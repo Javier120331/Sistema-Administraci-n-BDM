@@ -241,7 +241,8 @@
                                 <thead>
                                     <tr>
                                         <th>Fecha</th>
-                                        <th>Monto</th>
+                                        <th>Sueldo Base</th>
+                                        <th>Sueldo Total</th>
                                         <th>Estado</th>
                                     </tr>
                                 </thead>
@@ -249,7 +250,8 @@
                                     @foreach($trabajador->sueldosBase as $sueldo)
                                     <tr>
                                         <td>{{ $sueldo->created_at ? $sueldo->created_at->format('d/m/Y') : 'N/A' }}</td>
-                                        <td><strong>${{ number_format($sueldo->monto ?? 0, 0, ',', '.') }}</strong></td>
+                                        <td>${{ number_format($sueldo->valor ?? 0, 0, ',', '.') }}</td>
+                                        <td><strong>${{ number_format($sueldo->valor_total ?? 0, 0, ',', '.') }}</strong></td>
                                         <td>
                                             <span class="badge badge-{{ $sueldo->estado == 1 ? 'success' : 'secondary' }}">
                                                 {{ $sueldo->estado == 1 ? 'Vigente' : 'Inactivo' }}
