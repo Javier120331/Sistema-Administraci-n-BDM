@@ -1,0 +1,77 @@
+services:
+  # Servicio de la aplicación
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: suelditas_beta
+    container_name: suelditas_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - suelditas_network
+    depends_on:
+      - db
+
+  # Servidor web Nginx
+  webserver:
+    image: nginx:alpine
+    container_name: suelditas_webserver
+    restart: unless-stopped
+    ports:
+      - "8082:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - suelditas_network
+    depends_on:
+      - app
+
+  # Base de datos MySQL
+  db:
+    image: mysql:8.0
+    container_name: suelditas_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: suelditas_db
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: suelditas_user
+      MYSQL_PASSWORD: suelditas_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - suelditas_network
+
+  # PHPMyAdmin
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: suelditas_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8083:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: suelditas_user
+      PMA_PASSWORD: suelditas_password
+    networks:
+      - suelditas_network
+    depends_on:
+      - db
+
+# Redes de Docker
+networks:
+  suelditas_network:
+    driver: bridge
+
+# Volúmenes
+volumes:
+  dbdata:
+    driver: local
